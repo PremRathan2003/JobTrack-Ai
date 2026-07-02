@@ -1,0 +1,17 @@
+name: Hourly Gmail Sync
+
+on:
+  schedule:
+    - cron: '0 * * * *'   # every hour, on the hour (UTC)
+  workflow_dispatch:       # allows manual "Run workflow" button
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping sync endpoint
+        run: |
+          curl -sS -X POST \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            --max-time 120 \
+            https://jobtrack-ai-hf0g.onrender.com/api/gmail/cron
