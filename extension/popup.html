@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { font-family: system-ui, sans-serif; width: 300px; padding: 14px; margin: 0; }
+    h1 { font-size: 15px; margin: 0 0 10px; }
+    input, textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 7px;
+      border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+    button { width: 100%; padding: 8px; background: #4f46e5; color: #fff; border: 0;
+      border-radius: 6px; font-size: 13px; cursor: pointer; }
+    button:disabled { opacity: .5 }
+    .msg { font-size: 12px; margin-top: 6px; }
+    .ok { color: #16a34a } .err { color: #dc2626 }
+    label { font-size: 11px; color: #6b7280 }
+  </style>
+</head>
+<body>
+  <h1>Save job to JobTrack AI</h1>
+  <label>API token (from JobTrack Settings)</label>
+  <input id="token" type="password" placeholder="Firebase ID token" />
+  <label>API URL</label>
+  <input id="apiUrl" placeholder="https://your-backend.example.com" />
+  <input id="company" placeholder="Company *" />
+  <input id="title" placeholder="Job title *" />
+  <input id="location" placeholder="Location" />
+  <textarea id="notes" rows="2" placeholder="Notes (job URL is added automatically)"></textarea>
+  <button id="save">Save application</button>
+  <div id="msg" class="msg"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

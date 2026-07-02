@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  firebaseUid   String        @unique
+  email         String        @unique
+  name          String?
+  photoUrl      String?
+  createdAt     DateTime      @default(now())
+  gmailAccount  GmailAccount?
+  applications  Application[]
+  notifications Notification[]
+  documents     Document[]
+}
+
+model GmailAccount {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gmailAddress      String
+  accessTokenEnc    String    // AES-256-GCM encrypted
+  refreshTokenEnc   String    // AES-256-GCM encrypted
+  tokenExpiry       DateTime?
+  lastSyncAt        DateTime?
+  lastHistoryId     String?
+  syncEnabled       Boolean   @default(true)
+  connectedAt       DateTime  @default(now())
+}
+
+enum AppStatus {
+  APPLIED
+  APPLICATION_RECEIVED
+  UNDER_REVIEW
+  ASSESSMENT
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  OFFER_RECEIVED
+  REJECTED
+  WITHDRAWN
+}
+
+model Application {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company       String
+  jobTitle      String
+  location      String?
+  portal        String?     // linkedin | indeed | workday | greenhouse | lever | smartrecruiters | ashby | other
+  status        AppStatus   @default(APPLIED)
+  appliedAt     DateTime    @default(now())
+  lastEmailAt   DateTime?
+  notes         String?
+  source        String      @default("email") // email | manual | extension
+  emails        EmailRecord[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, company])
+  @@unique([userId, company, jobTitle])
+}
+
+model EmailRecord {
+  id             String      @id @default(cuid())
+  applicationId  String
+  application    Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  gmailMessageId String      @unique
+  subject        String
+  sender         String
+  snippet        String?
+  receivedAt     DateTime
+  detectedStatus AppStatus?
+  createdAt      DateTime    @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // interview | offer | assessment_deadline
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   // resume | cover_letter
+  filename  String
+  mimeType  String
+  data      Bytes
+  createdAt DateTime @default(now())
+}
