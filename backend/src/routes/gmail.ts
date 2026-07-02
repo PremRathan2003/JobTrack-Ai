@@ -49,4 +49,15 @@ router.delete('/disconnect', requireAuth, async (req: AuthedRequest, res, next) 
   try { await disconnect(req.userId!); res.status(204).end(); } catch (e) { next(e); }
 });
 
+
+// External cron ping (e.g. cron-job.org) — wakes the service and syncs everyone
+router.post('/cron', async (req, res) => {
+  if (req.headers['x-cron-secret'] !== process.env.CRON_SECRET) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  const { syncAllUsers } = await import('../services/sync.service');
+  syncAllUsers().catch(console.error);
+  res.json({ started: true });
+});
+
 export default router;
